@@ -1,0 +1,15 @@
+<configuration>
+    <evaluator name="exceptionOccurrenceEval">
+        <expression>logger.contains("throwable")</expression>
+    </evaluator>
+
+    <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%d{yyyy.MM.dd HH:mm:ss.SSS}] [%-5level] [%thread] [%class.%method\(\) at line %line]\t\t%message%n%xException{full, exceptionOccurrenceEval}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="consoleAppender" />
+    </root>
+</configuration>

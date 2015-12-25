@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.devromik</groupId>
+    <artifactId>text-file-indexer</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.7</java.version>
+
+        <!-- ***** Библиотеки общего назначения. ***** -->
+
+        <commons-lang3.version>3.4</commons-lang3.version>
+
+        <!-- ***** Логирование. ***** -->
+
+        <slf4j-api.version>1.7.12</slf4j-api.version>
+        <slf4j-utils.version>1.0</slf4j-utils.version>
+
+        <!-- ***** Тестирование. ***** -->
+
+        <junit.version>4.12</junit.version>
+        <mockito-all.version>1.10.19</mockito-all.version>
+        <janino.version>2.5.10</janino.version>
+        <logback.version>1.1.3</logback.version>
+
+        <!-- ***** Maven. ***** -->
+
+        <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
+
+        <!-- ***** Статический анализ. ***** -->
+
+        <sonar-maven-plugin.version>2.6</sonar-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.7.4.201502262128</jacoco-maven-plugin.version>
+    </properties>
+
+    <dependencies>
+        <!-- ***** Библиотеки общего назначения. ***** -->
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+
+        <!-- ***** Логирование. ***** -->
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.devromik</groupId>
+            <artifactId>slf4j-utils</artifactId>
+            <version>${slf4j-utils.version}</version>
+        </dependency>
+
+        <!-- ***** Тестирование. ***** -->
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>${mockito-all.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Необходима для Logback. -->
+        <dependency>
+            <groupId>janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>${janino.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-access</artifactId>
+            <version>${logback.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- Профиль для разработки:
+                 - сборка,
+                 - модульные тесты. -->
+        <profile>
+            <id>dev</id>
+
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Профиль для статического анализа на центральном (уровня компании, команды) SonarQube.
+             Перед использованием этого профиля необходимо определить следующие переменные окружения:
+                 - CENTRAL_SONAR_JDBC_URL,
+                 - CENTRAL_SONAR_JDBC_USER_NAME,
+                 - CENTRAL_SONAR_JDBC_PASSWORD,
+                 - CENTRAL_SONAR_JDBC_DRIVER. -->
+        <profile>
+            <id>central-static-analysis</id>
+
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+
+            <properties>
+                <sonar.jdbc.url>${env.CENTRAL_SONAR_JDBC_URL}</sonar.jdbc.url>
+                <sonar.jdbc.username>${env.CENTRAL_SONAR_JDBC_USER_NAME}</sonar.jdbc.username>
+                <sonar.jdbc.password>${env.CENTRAL_SONAR_JDBC_PASSWORD}</sonar.jdbc.password>
+                <sonar.jdbc.driver>${env.CENTRAL_SONAR_JDBC_DRIVER}</sonar.jdbc.driver>
+                <sonar.scm.disabled>true</sonar.scm.disabled>
+            </properties>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>sonar-maven-plugin</artifactId>
+                        <version>${sonar-maven-plugin.version}</version>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco-maven-plugin.version}</version>
+
+                        <executions>
+                            <execution>
+                                <id>default-prepare-agent</id>
+
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+
+                            <execution>
+                                <id>default-report</id>
+                                <phase>prepare-package</phase>
+
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+
+                            <execution>
+                                <id>default-check</id>
+
+                                <configuration>
+                                    <rules/>
+                                </configuration>
+
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Профиль для статического анализа на локальном (личном) SonarQube.
+             Перед использованием этого профиля необходимо определить следующие переменные окружения:
+                 - LOCAL_SONAR_JDBC_URL,
+                 - LOCAL_SONAR_JDBC_USER_NAME,
+                 - LOCAL_SONAR_JDBC_PASSWORD,
+                 - LOCAL_SONAR_JDBC_DRIVER. -->
+        <profile>
+            <id>local-static-analysis</id>
+
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+
+            <properties>
+                <sonar.jdbc.url>${env.LOCAL_SONAR_JDBC_URL}</sonar.jdbc.url>
+                <sonar.jdbc.username>${env.LOCAL_SONAR_JDBC_USER_NAME}</sonar.jdbc.username>
+                <sonar.jdbc.password>${env.LOCAL_SONAR_JDBC_PASSWORD}</sonar.jdbc.password>
+                <sonar.jdbc.driver>${env.LOCAL_SONAR_JDBC_DRIVER}</sonar.jdbc.driver>
+                <sonar.scm.disabled>true</sonar.scm.disabled>
+            </properties>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>sonar-maven-plugin</artifactId>
+                        <version>${sonar-maven-plugin.version}</version>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco-maven-plugin.version}</version>
+
+                        <executions>
+                            <execution>
+                                <id>default-prepare-agent</id>
+
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+
+                            <execution>
+                                <id>default-report</id>
+                                <phase>prepare-package</phase>
+
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+
+                            <execution>
+                                <id>default-check</id>
+
+                                <configuration>
+                                    <rules/>
+                                </configuration>
+
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
